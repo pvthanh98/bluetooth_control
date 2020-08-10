@@ -2,17 +2,19 @@ import 'react-native-gesture-handler';
 import React from 'react';
 import Icon from 'react-native-vector-icons/dist/FontAwesome';
 import {connect} from 'react-redux';
-import {ColorPicker, fromHsv} from 'react-native-color-picker';
-import {StyleSheet, Text, View, Slider, Alert} from 'react-native';
+import {ColorPicker, fromHsv, toHsv} from 'react-native-color-picker';
+import {StyleSheet, Text, View, Slider, Alert, Image} from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import BluetoothSerial from 'react-native-bluetooth-serial';
 import { convertHexToRgbString } from "./utils";
 import * as actions from '../actions/index';
+import timerImg from '../assets/timer.png'
 class Home extends React.Component {
   constructor(props){
       super(props);
       this.state = {
-        dimmer: 1
+        dimmer: 1,
+        selectedColor:null
       }
   }
   async componentDidMount(){
@@ -58,7 +60,11 @@ class Home extends React.Component {
   }
 
   handleColorChange = async (color) =>{
+    console.log("original color: ", color)
     color = fromHsv(color);
+    this.setState({selectedColor:toHsv(color)})
+    console.log("SELECTED COLOR: ",this.state.selectedColor)
+    console.log("from hsv color(HEX COLOR ): ", color)
     try {
 			var data = `color ${convertHexToRgbString(color)}\r`;
 			console.log(`Wrote data "${data}" to device`);
@@ -123,16 +129,17 @@ class Home extends React.Component {
             onColorSelected={(color) => console.log(`Color selected: ${color}`)}
             style={{flex: 1}}
             onColorChange={this.handleColorChange}
-          />
-         
+            color={this.state.selectedColor}
+          />  
         </View>
         <View style={styles.block2}>
           <TouchableOpacity 
             style={styles.buttonFlash}
             onPress={()=> this.sendData('flash\r')}
           >
-            <Text style={[styles.textCenter, {color:"white"}]}>FLASH</Text>
+          <Text style={[styles.textCenter, {color:"white"}]}>FLASH</Text>
           </TouchableOpacity>
+          <Image source={timerImg} style={{height:60, width:60}} />
           <TouchableOpacity 
             style={styles.buttonFlash}
             onPress={()=> this.sendData('fade\r')}

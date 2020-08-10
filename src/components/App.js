@@ -20,6 +20,9 @@ class App extends React.Component {
           />
           <Stack.Screen name="Device" 
             component={Device} 
+            options={{
+              headerTitleAlign:"center",
+            }}
           />
         </Stack.Navigator>
       </NavigationContainer>
