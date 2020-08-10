@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, StyleSheet, FlatList, ActivityIndicator} from 'react-native';
+import {View, StyleSheet, FlatList, ActivityIndicator} from 'react-native';
 import {connect} from 'react-redux';
 import BluetoothSerial from 'react-native-bluetooth-serial';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -53,19 +53,6 @@ class Device extends React.Component {
             )}
             />
         </View>
-        <View style={{flex:1}}>
-            <Text style={styles.title}>
-                <Icon name="plug" size={30}/>
-                {" "}Unpaired Device
-            </Text>
-            <FlatList
-            style={{padding: 4}}
-            data={devices}
-            renderItem={({item}) => (
-                <DeviceItem ItemStyle={styles.flatItem} item={item} />
-            )}
-            />
-        </View>
       </View>
     );
   }
@@ -75,11 +62,12 @@ const styles = StyleSheet.create({
   flatItem: {
     alignItems: 'stretch',
     shadowColor:"black",
-    marginTop: 4,   
+    marginTop: 8,   
     padding: 16,
     flexDirection:"row",
     borderBottomWidth: 2,
-    borderBottomColor: "#d3d3d3"
+    borderBottomColor: "#d3d3d3",
+    backgroundColor:"white"
   },
   title:{
       fontWeight:"700",

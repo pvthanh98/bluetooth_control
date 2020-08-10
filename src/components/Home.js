@@ -91,20 +91,32 @@ class Home extends React.Component {
     const{connectedDevice} = this.props;
     return (
       <View style={styles.container}>
+        {
+          !this.state.connectedDevice &&
+          <View style={styles.warning}>
+            <Text style={styles.warningText}>
+              <Icon name="warning" size={16} />
+              {" "}Device has not connected
+            </Text>
+          </View>
+        }
         <View style={styles.block1}>
           <TouchableOpacity style={styles.button} onPress={()=> navigation.navigate('Device')}>
             <Text style={styles.textCenter}>
                 <Icon name="bars" size={30} color="#900" /> 
             </Text>
           </TouchableOpacity>
-          <Text>
-            Connecting: {connectedDevice && connectedDevice.name} {"\n"} 
-            {connectedDevice && connectedDevice.id}
-            {"  "}
-            <TouchableOpacity onPress={this.onDisconnect}>
-              {connectedDevice && <Icon name="times-circle" size={16} color="#900" />} 
-            </TouchableOpacity>
-          </Text>
+          { this.state.connectedDevice &&
+            <Text>
+              Connecting: {connectedDevice && connectedDevice.name} {"\n"} 
+              {connectedDevice && connectedDevice.id}
+              {"  "}
+              <TouchableOpacity onPress={this.onDisconnect}>
+                {connectedDevice && <Icon name="times-circle" size={16} color="#900" />} 
+              </TouchableOpacity>
+            </Text>
+          }
+          
         </View>
         <View style={styles.colorPicker}>
           <ColorPicker
@@ -186,6 +198,14 @@ const styles = StyleSheet.create({
     padding:12,
     borderRadius:4,
     backgroundColor:"#ff0000"
+  },
+  warning:{
+      alignItems:"center",
+      backgroundColor:"yellow",
+      padding:4
+  },
+  warningText:{
+    fontSize:16
   }
 });
 
