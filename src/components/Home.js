@@ -3,7 +3,9 @@ import React from 'react';
 import Icon from 'react-native-vector-icons/dist/FontAwesome';
 import {connect} from 'react-redux';
 import {ColorPicker, fromHsv} from 'react-native-color-picker';
-import {StyleSheet, Text, View, Alert, Image} from 'react-native';
+import { ColorWheel } from 'react-native-color-wheel';
+import {StyleSheet, Text, View, Alert, Image, Dimensions} from 'react-native';
+import TimePicker from "react-native-24h-timepicker";
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import BluetoothSerial from 'react-native-bluetooth-serial';
 import {convertHexToRgbString} from './utils';
@@ -14,9 +16,9 @@ class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      time: null,
       selectedColor: null,
-      power: 'off\r',
-      timer: null,
+      power: 'off',
     };
   }
   async componentDidMount() {
@@ -54,46 +56,43 @@ class Home extends React.Component {
     }
   };
 
+
   enableBluetooth = async () => {
     await BluetoothSerial.enable();
   };
 
-  sendData = (data) => {
+  sendData = (data, isoff=false) => {
+    if(!this.props.connectedDevice){
+      Alert.alert(
+        'Waring',
+        'Device has not connected',
+      );
+    }
     BluetoothSerial.write(data)
       .then((res) => {
         console.log(`Successfully wrote "${data}" to device`, res);
+        if(isoff===false && this.state.power==="off"){
+          this.setState({power:"on"})
+         
+        }
+        if(isoff===true){
+          console.log("Turn off")
+          this.setState({power:"off"})
+        }
       })
       .catch((err) => console.log(err.message));
   };
 
   handleColorChange = async (color) => {
-    // console.log("original color: ", color)
     color = fromHsv(color);
     this.setState({selectedColor: color});
-    // console.log("SELECTED COLOR: ",color)
-    // console.log("from hsv color(HEX COLOR ): ", color)
     try {
       var data = `color ${convertHexToRgbString(color)}\r`;
       console.log(`Wrote data "${data}" to device`);
-      BluetoothSerial.write(data);
+      this.sendData(data)
     } catch (e) {
       console.log(e);
     }
-  };
-
-  setTimer = () => {
-    //to turn off light
-    this.setState({
-      timer: 30,
-    });
-    const timecounting = setInterval(() => {
-      if (this.state.timer <= 0) {
-        this.setState({timer:null})
-        clearInterval(timecounting);
-        return
-      }
-      this.setState({timer: this.state.timer - 1});
-    }, 1000);
   };
 
   setDimmer = async (value) => {
@@ -114,12 +113,23 @@ class Home extends React.Component {
   };
 
   handleColorSelected = async (color) => {
-    console.log(this.state.power);
-    await BluetoothSerial.write(this.state.power);
-    this.setState({
-      power: this.state.power === 'off\r' ? 'flash\r' : 'off\r',
-    });
+    let rgbColor = convertHexToRgbString(fromHsv(color))
+    if(this.state.power === "on"){
+      this.sendData('off\r', true);
+    } else {
+      this.sendData(`color ${rgbColor}\r`);
+    }
+
   };
+
+  onConfirm =  (hour, minute) => {
+    this.setState({ time: `${hour}:${minute}` });
+    var second = hour * 60 * 60 + minute * 60;
+    console.log(`set timer: ${hour}:${minute}\nsecond: ${second}`)
+    var data = `timer ${second}\r`;
+    this.TimePicker.close();
+    this.sendData(data);
+  }
 
   render() {
     const {navigation} = this.props;
@@ -141,7 +151,6 @@ class Home extends React.Component {
               <Icon name="bars" size={30} color="#900" />
             </Text>
           </TouchableOpacity>
-          <Text>Shutdown in : {this.state.timer}</Text>
           {connectedDevice && (
             <Text>
               Connecting: {connectedDevice && connectedDevice.name} {'\n'}
@@ -162,6 +171,13 @@ class Home extends React.Component {
             onColorChange={this.handleColorChange}
             color={this.state.selectedColor}
           />
+          {/* <ColorWheel
+            initialColor="#ee0000"
+            onColorChange={color => console.log({color})}
+            onColorChangeComplete={color => onChange(color)}
+            style={{width: Dimensions.get('window').width}}
+            thumbStyle={{ height: 30, width: 30, borderRadius: 30}}
+          /> */}
         </View>
         <View style={styles.block2}>
           <TouchableOpacity
@@ -170,7 +186,10 @@ class Home extends React.Component {
             <Text style={[styles.textCenter, {color: 'white'}]}>FLASH</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity activeOpacity={0.8} onPress={this.setTimer}>
+          <TouchableOpacity 
+            activeOpacity={0.5}
+            onPress={()=> this.TimePicker.open()}
+          >
             <Image source={timerImg} style={{height: 60, width: 60}} />
           </TouchableOpacity>
 
@@ -179,6 +198,17 @@ class Home extends React.Component {
             onPress={() => this.sendData('fade\r')}>
             <Text style={[styles.textCenter, {color: 'white'}]}>FADE</Text>
           </TouchableOpacity>
+        </View>
+        <View>
+          <TimePicker
+            ref={(ref) => {
+              this.TimePicker = ref;
+            }}
+            onCancel={() => this.TimePicker.close()}
+            onConfirm={(hour, minute) => this.onConfirm(hour, minute)}
+            hourUnit=" H"
+            minuteUnit=" M"
+          />
         </View>
       </View>
     );
