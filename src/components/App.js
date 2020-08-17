@@ -15,7 +15,7 @@ class App extends React.Component {
             name="Home" 
             component={Home} 
             options={{
-                headerTitleAlign:"center",
+                headerShown:false
             }}
           />
           <Stack.Screen name="Device" 

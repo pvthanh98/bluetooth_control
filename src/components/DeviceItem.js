@@ -35,7 +35,7 @@ class DeviceItem extends React.Component {
           onPress={this.onConnectDevice}
         > 
           <View>  
-            <Icon name="desktop" size={30} />
+            <Icon name="mobile" color="#0c850e" size={30} />
           </View>
           <View>
             <Text style={{marginLeft:8, padding:2, fontWeight:"700"}}> {this.props.item.name}</Text>

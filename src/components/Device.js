@@ -9,7 +9,7 @@ class Device extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      connecting: false
+      connecting: false,
     }
   }
 
@@ -18,14 +18,13 @@ class Device extends React.Component {
   }
 
   async componentDidMount(){
-    this.props.loadDevice();
-    try {
-      const unpairedDevices = await BluetoothSerial.listUnpaired()
+    this.props.loadDevice();    
+    try{
+      const unpairedDevices = await BluetoothSerial.discoverUnpairedDevices();
       console.log('discovered devices', unpairedDevices)
-    } catch (e){
-      console.log(e)
+    } catch(e){
+      console.log("ERROR", e)
     }
-    
   }
 
   render() {
@@ -38,11 +37,12 @@ class Device extends React.Component {
               <ActivityIndicator
                 size={"large"}
                 color="red"
+                style={{marginTop:8}}
               />
             }
             <FlatList
             style={{padding: 4}}
-            data={devices}
+            data={this.props.devices}
             renderItem={({item}) => (
                 <DeviceItem 
                   navigation={navigation} 
